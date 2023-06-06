@@ -14,6 +14,8 @@ class Participant extends State {
         this.setId(id);
         this.setName(name);
         this.setRole(role);
+        this.setVoted()
+        this.setVoteCount()
     }
 
     /* Basic Getters */
@@ -30,6 +32,10 @@ class Participant extends State {
         return this.role;
     }
 
+    getVoted() {
+        return this.voted;
+    }
+
     /** basic setters */
     
     setId(id) {
@@ -43,6 +49,27 @@ class Participant extends State {
     setRole(role) {
         this.role = role;
     }
+
+    addVote() {
+        this.voteCount += 1
+    }
+
+    setVoteCount() {
+        this.voteCount = 0
+    }
+
+    setVoted() {
+        this.voted = false;
+    }
+
+    vote() {
+        if (this.voted === false) {
+            this.voted = true;
+        }
+    }
+
+
+    
 
     /**
      * Returns an object from a buffer. Normally called after a getState

@@ -94,17 +94,11 @@ class EggTrackingContract extends Contract {
   async createElection(ctx, electionCreatorId, electionId, electionName, electionParticipants) {
 
     let parsedParticipants = JSON.parse(electionParticipants);
-    let identity = ctx.clientIdentity;
-
-    if (!this.isElectionCreator(identity) && !this.isAdmin(identity)) {
-      throw new Error(`Elections can only be created by electionCreators or Admins`);
-    }
 
     let election = new Election(electionCreatorId, electionId, electionName, parsedParticipants);
 
     let key = election.getType() + ":" + election.getOriginId() + ":" + election.getElectionId();
-    let electionExists = await this.assetExists(ctx, key);
-
+    let electionExists = await this.assetExists(ctx, electionId);
 
     if (electionExists) {
       throw new Error(`Election with key ${key} already exists`);
@@ -123,12 +117,61 @@ class EggTrackingContract extends Contract {
     return JSON.stringify(election);
   }
 
-  async voteForParticipant(ctx, electionId) {
-    const electionParticipants = await this.getParticipants(ctx, electionId);
-    
+  async voteForParticipant(ctx, participantId, voterId, ) {
+    let identity = ctx.clientIdentity;
+
+    if (!participantId === this.getParticipantId(identity) && !this.isAdmin(identity)) {
+      throw new Error(`Only administrators can query other participants. Regular participants can get information of their own account`);
+    }
+
+    // get participant
+    const buffer = await ctx.stub.getState('Participant:' + participantId);
+    const buffer2 = await ctx.stub.getState('Participant:' + voterId);
+
+    // if participant was not found
+    if (!buffer || buffer.length == 0) {
+      throw new Error(`Participant with id ${participantId} was not found`);
+    }
+
+    if (!buffer2 || buffer2.length == 0) {
+      throw new Error(`Participant with id ${voterId} was not found`);
+    }
+
+    const participantToVoteOn = Participant.deserialise(buffer);
+    console.log('participant', participantToVoteOn)
+    const voterToVote = Participant.deserialise(buffer2);
+    console.log('voter', voterToVote)
+
+
+    if (voterToVote.getVoted() === true) {
+        throw new Error(`The voter with id: ${voterId} has already voted`);
+    }
+
+    participantToVoteOn.addVote();
+    voterToVote.vote();
+
+    await ctx.stub.putState('Participant:' + participantId, participantToVoteOn.serialise());
+    await ctx.stub.putState('Participant:' + voterId, voterToVote.serialise());
+
+    return participantToVoteOn
+}
+
+
+  async finishElection(ctx, electionId) {
+    const election = await this.getElection(ctx ,electionId)
+    if (!election.isRunning) {
+      throw new Error(`Election with ID ${electionId} is already finished or not started yet`)
+    }
+
+    election.setFinished()
+    await ctx.stub.putState(electionId, election.serialise());
+
+    return "election has been has been finished"
   }
 
-  async getParticpants(ctx, electionId) {
+
+
+  async getParticipants(ctx, electionId) {
     const election = await this.getElection(ctx, electionId);
 
     const electionParticipants = election.getElectionParticipants()
@@ -136,17 +179,9 @@ class EggTrackingContract extends Contract {
   }
 
   async getElection(ctx, electionId) {
-    console.log('test', electionId)
-    let identity = ctx.clientIdentity;
-
-    if (!this.isElectionCreator(identity) && !this.isAdmin(identity)) {
-      throw new Error(`Elections can only be started by electionCreators or Admins`);
-    }
 
     const buffer = await ctx.stub.getState(electionId);
-    console.log(buffer)
 
-    console.log(electionId)
     if (!buffer || buffer.length == 0) {
       throw new Error(`election with ID ${electionId} not found`);
     }
@@ -158,7 +193,7 @@ class EggTrackingContract extends Contract {
 
 
   async startElection(ctx, electionId) {
-    const election = await this.getElection(electionId)
+    const election = await this.getElection(ctx ,electionId)
     if (!election.isNotStarted) {
       throw new Error(`Election with ID ${electionId} has either already started or is finished`)
     }
@@ -166,9 +201,9 @@ class EggTrackingContract extends Contract {
     election.setRunning()
     await ctx.stub.putState(electionId, election.serialise());
 
-    return "election has been started"
-
+    return election
   }
+
 
 
 
@@ -332,6 +367,36 @@ class EggTrackingContract extends Contract {
    */
   getParticipantId(identity) {
     return identity.getAttributeValue('id');
+  }
+
+
+  async queryElections(ctx) {
+    let queryString = {
+      selector: {
+        type: 'Election',
+        currentState: 'Started'
+      }
+
+    }
+    let resultsIterator = await ctx.stub.getQueryResult(JSON.stringify(queryString));
+
+    let allResults = [], count = 0;
+
+    while (true) {
+      let res = await resultsIterator.next();
+      if (res.value && res.value.value.toString()) {
+        let jsonRes = {};
+        jsonRes.key = res.value.key;
+        jsonRes.record = JSON.parse(res.value.value.toString('utf8'));
+        allResults.push(jsonRes);
+      }
+
+      if (res.done || ++count === max) {
+        await resultsIterator.close();
+        break;
+      }
+    }
+    return allResults;
   }
 
   /**

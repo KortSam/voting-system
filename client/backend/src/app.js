@@ -14,8 +14,8 @@ let network = require('./fabric/network.js');
  * Register a voter
  * 
  * 
- * {"id":"V1","name":"Voter 1","role":"Voter"},
- * {"id":"P1","name":"Participant 1","role":"Voter"}
+ * {"id":"V1","name":"Voter 1","role":"Voter"}
+ * {"id":"P1","name":"Participant 1","role":"Participant"}
  * {"id":"C1","name":"electionCreator 1","role":"ElectionCreator"}
  */
 app.post('/rest/createParticipant', async (req, res) => {
@@ -48,6 +48,8 @@ app.post('/rest/createParticipant', async (req, res) => {
         }
     }
 });
+
+
 
 /**
  * Pack eggs
@@ -141,6 +143,22 @@ app.post('/rest/eggboxes', async (req, res) => {
 });
 
 
+app.get('/rest/getParticipant/:electionCreatorId/:participantId', async (req, res) => {
+    let networkObj = await network.connectToNetwork(req.params.electionCreatorId);
+    if (networkObj.error) {
+        res.status(400).json({ message: networkObj.error });
+    }
+    let invokeResponse = await network.getParticipant(networkObj, req.params.participantId);
+    if (invokeResponse.error) {
+        res.status(400).json({ message: invokeResponse.error });
+    } else {
+        res.setHeader('Content-Type', 'application/json');
+        res.status(201).send(invokeResponse);
+    }
+
+})
+
+
 /**
  * create an Election
  * 
@@ -154,7 +172,6 @@ app.post('/rest/createElection', async (req, res) => {
     if (networkObj.error) {
         res.status(400).json({ message: networkObj.error });
     }
-    console.log(req.body.electionId)
     let invokeResponse = await network.createElection(networkObj, req.body.electionCreatorId, req.body.electionId, req.body.electionName, req.body.electionParticipants);
     if (invokeResponse.error) {
         res.status(400).json({ message: invokeResponse.error });
@@ -169,7 +186,7 @@ app.post('/rest/createElection', async (req, res) => {
 /**
  * start election
  * 
- * {"electionCreatorId": "C1", "ElectionId": "E1" (param)}
+ * {"electionCreatorId": "C1", "electionId": "E1"}
  */
 app.post('/rest/start', async (req, res) => {
     console.log(req.body.electionId)
@@ -177,8 +194,6 @@ app.post('/rest/start', async (req, res) => {
     if (networkObj.error) {
         res.status(400).json({ message: networkObj.error });
     }
-    console.log('test')
-
     let invokeResponse = await network.startElection(networkObj, req.body.electionId);
     if (invokeResponse.error) {
         res.status(400).json({ message: invokeResponse.error });
@@ -198,6 +213,60 @@ app.get('/rest/getElection', async (req, res) => {
     }
 
     let invokeResponse = await network.getElection(networkObj, req.body.electionId);
+    if (invokeResponse.error) {
+        res.status(400).json({ message: invokeResponse.error });
+    } else {
+        res.setHeader('Content-Type', 'application/json');
+        res.status(201).send(invokeResponse);
+    }
+})
+
+/**
+ * {"electionCreatorId": "C1", "electionId": "E1"}
+ */
+app.get('/rest/getParticipants/:electionCreatorId/:electionId', async (req, res) => {
+    let networkObj = await network.connectToNetwork(req.params.electionCreatorId);
+    if (networkObj.error) {
+        res.status(400).json({ message: networkObj.error });
+    }
+
+    let invokeResponse = await network.getParticipants(networkObj, req.params.electionId);
+    if (invokeResponse.error) {
+        res.status(400).json({ message: invokeResponse.error });
+    } else {
+        res.setHeader('Content-Type', 'application/json');
+        res.status(201).send(invokeResponse);
+    }
+})
+
+/**
+ * {"electionCreatorId": "C1", "participantId": "P1", "voterId": "V1"}
+ */
+app.post('/rest/voteForParticipant', async (req, res) => {
+    let networkObj = await network.connectToNetwork(req.body.electionCreatorId);
+    if (networkObj.error) {
+        res.status(400).json({ message: networkObj.error });
+    }
+    let invokeResponse = await network.voteForParticipant(networkObj, req.body.participantId, req.body.voterId);
+    if (invokeResponse.error) {
+        res.status(400).json({ message: invokeResponse.error });
+    } else {
+        res.setHeader('Content-Type', 'application/json');
+        res.status(201).send(invokeResponse);
+    }
+})
+
+
+/**
+ * {"electionCreatorId": "C1", "electionId": "E1"}
+ */
+app.post('/rest/finish', async (req, res) => {
+    let networkObj = await network.connectToNetwork(req.body.electionCreatorId);
+    if (networkObj.error) {
+        res.status(400).json({ message: networkObj.error });
+    }
+
+    let invokeResponse = await network.finishElection(networkObj, req.body.electionId);
     if (invokeResponse.error) {
         res.status(400).json({ message: invokeResponse.error });
     } else {
@@ -301,20 +370,6 @@ app.post('/rest/shipments/:shipmentId/delivery', async (req, res) => {
     }
 });
 
-
-/**
- * Cast vote - voter
- * 
- * {"voterId": 1, "participant": Henk Snel}
- */
-app.post('/rest/:electionId/vote', async (req, res) => {
-    let networkObj = await network.connectToNetwork(req.body.shipperId);
-
-
-    if (networkObj.error) {
-        res.status(400).json({ message: networkObj.error });
-    }
-})
 
 const port = process.env.PORT || 8080; 
 app.listen(port);

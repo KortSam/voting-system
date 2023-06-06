@@ -169,21 +169,18 @@ exports.createElection = async function (networkObj, electionCreatorId, election
         let response = { error: 'the following errors ocurred: ' + error.message ? error.message : error };
         return response;
     }
-}
+};
 
 exports.startElection = async function (networkObj, electionId) {
-
     try {
-        console.log(electionId)
         let response = await networkObj.contract.submitTransaction('startElection', electionId)
-        console.log(response)
         await networkObj.gateway.disconnect();
         return response.toString();
     } catch (error) {
         let response = { error: 'the following errors ocurred: ' + error.message ? error.message : error };
         return response;
     }
-}
+};
 
 exports.getElection = async function (networkObj, electionId) {
     try {
@@ -195,7 +192,43 @@ exports.getElection = async function (networkObj, electionId) {
         let response = { error: 'the following errors ocurred: ' + error.message ? error.message : error };
         return response
     }
-}
+};
+
+exports.getParticipants = async function (networkObj, electionId) {
+    try {
+        let response = await networkObj.contract.submitTransaction('getParticipants', electionId)
+        console.log(response)
+        await networkObj.gateway.disconnect();
+        return response
+    } catch (error) {
+        let response = { error: 'the following errors ocurred: ' + error.message ? error.message : error };
+        return response
+    }
+};
+
+
+exports.voteForParticipant = async function (networkObj, participantId, voterId) {
+    try {
+        let response = await networkObj.contract.submitTransaction('voteForParticipant', participantId, voterId)
+        console.log(response)
+        await networkObj.gateway.disconnect();
+        return response.toString();
+    } catch (error) {
+        let response = { error: 'the following errors ocurred: ' + error.message ? error.message : error };
+        return response
+    }
+};
+
+exports.finishElection = async function (networkObj, electionId) {
+    try {
+        let response = await networkObj.contract.submitTransaction('finishElection', electionId)
+        await networkObj.gateway.disconnect();
+        return response.toString();
+    } catch (error) {
+        let response = { error: 'the following errors ocurred: ' + error.message ? error.message : error };
+        return response;
+    }
+};
 
 
 exports.reportDamage = async function (networkObj, eggBoxId) {
