@@ -10,12 +10,6 @@ In this application you can annonymously register a voter and vote for a specifi
 
 The participants are catagorized into 3 groups. Voters, electionCreators and Participants.
 
-Voters are represent the person who votes on a specific election that has been created by an electionCreator.
-
-The electionCreator is responsible for creating the election and managing the election by creating, starting and ending the election.
-
-The participants are created by the electionCreator and are persons who the voter is able to vote on.
-
 #### Voter
 Voters represent the person who votes on a specific election that has been created by an electionCreator.
 
