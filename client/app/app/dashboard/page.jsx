@@ -1,8 +1,8 @@
 "use client"
-import { useEffect, useState } from "react"
+import { useState } from "react"
+import Cookies from 'js-cookie'
 
 export default function Dashboard() {
-
   const [election, setElection] = useState(null);
   const [participants, setParticipants] = useState([]);
   const [selectedParticipant, setSelectedParticipant] = useState(null);
@@ -10,7 +10,7 @@ export default function Dashboard() {
   async function createElection() {
     await fetch('http://localhost:8080/rest/createParticipant', {
       method: "POST",
-      body: '{"id":"P1","name":"Participant 1","role":"Participant"}',
+      body: '{"id":"P1","name":"Mark Rutte","role":"Participant"}',
       headers: {
         "Content-Type": "application/json",
       },
@@ -18,14 +18,14 @@ export default function Dashboard() {
 
     await fetch('http://localhost:8080/rest/createParticipant', {
       method: "POST",
-      body: '{"id":"P2","name":"Participant 2","role":"Participant"}',
+      body: '{"id":"P2","name":"Barack Obama","role":"Participant"}',
       headers: {
         "Content-Type": "application/json",
       },
     })
     await fetch('http://localhost:8080/rest/createParticipant', {
       method: "POST",
-      body: '{"id":"P3","name":"Participant 3","role":"Participant"}',
+      body: '{"id":"P3","name":"Donald Trump","role":"Participant"}',
       headers: {
         "Content-Type": "application/json",
       },
@@ -33,7 +33,7 @@ export default function Dashboard() {
 
     const res = await fetch('http://localhost:8080/rest/createElection', {
       method: "POST",
-      body: '{"electionCreatorId": "C1", "electionId": "E1", "electionName": "Election-1", "electionParticipants": "[P1, P2, P3]"}',
+      body: '{"electionCreatorId": "C1", "electionId": "E1", "electionName": "Election-1", "electionParticipants": "[Mark Rutte, Barack Obama, Donald Trump]"}',
       headers: {
         "Content-Type": "application/json",
       },
@@ -61,7 +61,7 @@ export default function Dashboard() {
     const str = array.replace("[", "").replace("]", "");
     let arr = str.split(",");
     let validArray = arr.map(item => item.trim());
-
+    console.log(validArray)
     setParticipants(validArray);
     setSelectedParticipant(null); // Clear the selected participant
     setElection(data)
@@ -74,12 +74,18 @@ export default function Dashboard() {
       return;
     }
 
+
+
+    const userId = Cookies.get('id')
+    const decryptedUserId = userId.split(/(.{6})/)
+    console.log(decryptedUserId)
+
     const res = await fetch('http://localhost:8080/rest/voteForParticipant', {
       method: "POST",
       body: JSON.stringify({
         "electionCreatorId": "C1",
         "participantId": selectedParticipant,
-        "voterId": "V1"
+        "voterId": decryptedUserId[1]
       }),
       headers: {
         "Content-Type": "application/json",
@@ -100,7 +106,7 @@ export default function Dashboard() {
     const data = await countVotes()
     console.log(data)
 
-    setSelectedParticipant(null); // Clear the selected participant
+    setSelectedParticipant(null);
   }
 
   async function countVotes() {
@@ -130,7 +136,7 @@ export default function Dashboard() {
     const winner = voteCount.reduce((prev, current) => (prev.voteCount > current.voteCount) ? prev : current);
 
     // Display the winner
-    return `The winner is ${winner.name} with ${winner.voteCount} votes.`;
+    alert(`The winner is ${winner.name} with ${winner.voteCount} votes.`)
   }
 
   return (
@@ -143,7 +149,7 @@ export default function Dashboard() {
             <div className='bg-white shadow-lg rounded-lg px-4 py-2'>
               <p className='font-semibold'>Election ID: <span className='font-normal'>{election.electionId}</span></p>
               <p className='font-semibold'>Election name: <span className='font-normal'>{election.electionName}</span></p>
-              <p className='font-semibold'>current status: <span className='font-normal'>{election.electionStatus}</span></p>
+              <p className='font-semibold'>current status: <span className='font-normal'>{election.currentState}</span></p>
             </div>
           ) : null}
         </div>
