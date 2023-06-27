@@ -115,9 +115,6 @@ As part of the transaction validation step performed by the peers, each validati
 
 An endorsement policy is a condition on what endorses a transaction. Blockchain peers have a pre-specified set of endorsement policies, which are referenced by a deploy transaction that installs specific chaincode. Endorsement policies can be parametrized, and these parameters can be specified by a deploy transaction.
 
-Take a look at configtx.yaml: the endorsement policy for the application chaincode is MAJORITY.
-
-![](doc/img/configtx.png)
 
 The figure below presents the standard workflow of chaincode transaction execution and endorsement.
 
