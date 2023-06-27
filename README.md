@@ -1,12 +1,12 @@
-### Use case
+## Use case
 
 We decided to create a voting-system whcich can be used for businesses.
 
 In this application you can annonymously register a voter and vote for a specific election which has been created by an electionCreator which would be the admin of the election.
 
-### How are particpants, assets and transactions modelled
+## How are particpants, assets and transactions modelled
 
-## participants
+### participants
 
 The participants are catagorized into 3 groups. Voters, electionCreators and Participants.
 
@@ -16,14 +16,14 @@ The electionCreator is responsible for creating the election and managing the el
 
 The participants are created by the electionCreator and are persons who the voter is able to vote on.
 
-# Voter
+#### Voter
 Voters represent the person who votes on a specific election that has been created by an electionCreator.
 
 Voters are registered by the user himself and is only able to select a participant and cast their vote.
 
 The identity of the voter is completely anonymous and encrypted.
 
-# electionCreator
+#### electionCreator
 The electionCreator is responsible for creating the election and managing the election by creating, starting and ending the election.
 
 An electionCreator can perform the following transactions:
@@ -34,7 +34,7 @@ starting an election.
 finishing an election which also counts the votes.
 An election creator can also retrieve all data about a specific election or participant. But not from the voter itself.
 
-# participants
+#### participants
 The participants are created by the electionCreator and are persons who the voter is able to vote on.
 
 the participant does not have any transactions it can perform because it is purely used to give as a voting option.
@@ -56,19 +56,19 @@ Vote validation: Each vote must be validated to ensure it adheres to the defined
 
 Result calculation: The system must accurately calculate and aggregate the voting results based on the votes cast by voters. This is being done when a voter casts a vote the participants voteCount gets updated.
 
-### event consumers
+## event consumers
 
 Participants: Participants in the voting system may consume events related to their own actions, such as receiving notifications when their vote is successfully cast or being updated on the election results.
 
 Election creator: Election administrators responsible for managing the voting process may consume events to monitor the progress of the election, detect any irregularities, and ensure the integrity of the system.
 
-### Peers, organisations and endorsement
+## Peers, organisations and endorsement
 
 In this application there are 2 peers and 2 organisations.
 
 The 2 peers which endorse with each othe to make sure that the election and the transactions around the election are synchronized.
 
-## Transaction Endorsement
+### Transaction Endorsement
 
 The consensus in Hyperledger Fabric is reached through endorsement. Every chaincode has an endorsement policy which specifies the set of peers on a channel that must execute chaincode and endorse the execution results for the transaction to be considered valid. These endorsement policies define the organizations (through their peers) who must “endorse” (i.e., approve of) the execution of a proposal [1].
 
