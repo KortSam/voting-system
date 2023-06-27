@@ -1,8 +1,15 @@
-You will see a folder structure with three elements:
+### Use case
+
+We decided to create a voting-system whcich can be used for businesses.
+
+In this application you can annonymously register a voter and vote for a specific election which has been created by an electionCreator which would be the admin of the election.
+
+
+### You will see a folder structure with three elements:
 
 * **chaincode**: The business logic of the blockchain network
 * **client/backend**: A backend application that allows users to interact with the blockchain network through a REST interface
-* **client/frontend**: An Angular application that interacts with the backend
+* **client/app**: An Angular application that interacts with the backend
 * **doc**: Some documentation elements
 
 ### Startup commands
