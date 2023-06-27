@@ -4,15 +4,94 @@ We decided to create a voting-system whcich can be used for businesses.
 
 In this application you can annonymously register a voter and vote for a specific election which has been created by an electionCreator which would be the admin of the election.
 
+### How are particpants, assets and transactions modelled
 
-### You will see a folder structure with three elements:
+## participants
+
+The participants are catagorized into 3 groups. Voters, electionCreators and Participants.
+
+Voters are represent the person who votes on a specific election that has been created by an electionCreator.
+
+The electionCreator is responsible for creating the election and managing the election by creating, starting and ending the election.
+
+The participants are created by the electionCreator and are persons who the voter is able to vote on.
+
+# Voter
+Voters represent the person who votes on a specific election that has been created by an electionCreator.
+
+Voters are registered by the user himself and is only able to select a participant and cast their vote.
+
+The identity of the voter is completely anonymous and encrypted.
+
+# electionCreator
+The electionCreator is responsible for creating the election and managing the election by creating, starting and ending the election.
+
+An electionCreator can perform the following transactions:
+
+creating a participant.
+creating an election.
+starting an election.
+finishing an election which also counts the votes.
+An election creator can also retrieve all data about a specific election or participant. But not from the voter itself.
+
+# participants
+The participants are created by the electionCreator and are persons who the voter is able to vote on.
+
+the participant does not have any transactions it can perform because it is purely used to give as a voting option.
+
+
+## assets
+The assets in this application are the election itself and the participants aswell. The election model has a few different componenents.
+
+the election has an id, name, the current status and a list of participants who the voter is able to vote on.
+
+the participants have an id, name, a voteCount and a boolean flag indicating whether the participant has already voted or not.
+
+
+## business rules
+
+Eligibility verification: Participants must meet specific criteria to be eligible to vote. Since this application is used in businesses and not as an national election the election creator is able to give out links to persons who are eligible to vote.
+
+Vote validation: Each vote must be validated to ensure it adheres to the defined rules, such as not voting multiple times, casting valid choices. This is being done by a boolean in the participant model setting it to true when the voter has voted.
+
+Result calculation: The system must accurately calculate and aggregate the voting results based on the votes cast by voters. This is being done when a voter casts a vote the participants voteCount gets updated.
+
+### event consumers
+
+Participants: Participants in the voting system may consume events related to their own actions, such as receiving notifications when their vote is successfully cast or being updated on the election results.
+
+Election creator: Election administrators responsible for managing the voting process may consume events to monitor the progress of the election, detect any irregularities, and ensure the integrity of the system.
+
+### Peers, organisations and endorsement
+
+In this application there are 2 peers and 2 organisations.
+
+The 2 peers which endorse with each othe to make sure that the election and the transactions around the election are synchronized.
+
+## Transaction Endorsement
+
+The consensus in Hyperledger Fabric is reached through endorsement. Every chaincode has an endorsement policy which specifies the set of peers on a channel that must execute chaincode and endorse the execution results for the transaction to be considered valid. These endorsement policies define the organizations (through their peers) who must “endorse” (i.e., approve of) the execution of a proposal [1].
+
+As part of the transaction validation step performed by the peers, each validating peer checks to make sure that the transaction contains the appropriate number of endorsements and that they are from the expected sources (both of these are specified in the endorsement policy). The endorsements are also checked to make sure they’re valid (i.e., that they are valid signatures from valid certificates) [1].
+
+An endorsement policy is a condition on what endorses a transaction. Blockchain peers have a pre-specified set of endorsement policies, which are referenced by a deploy transaction that installs specific chaincode. Endorsement policies can be parametrized, and these parameters can be specified by a deploy transaction.
+
+
+The figure below presents the standard workflow of chaincode transaction execution and endorsement.
+
+![](doc/img/transaction.png)
+
+
+### starting the application
+
+## You will see a folder structure with three elements:
 
 * **chaincode**: The business logic of the blockchain network
 * **client/backend**: A backend application that allows users to interact with the blockchain network through a REST interface
 * **client/app**: An Angular application that interacts with the backend
 * **doc**: Some documentation elements
 
-### Startup commands
+## Startup commands
 
 In this step, you will start your blockchain network. You should follow these instructions:
 
@@ -34,7 +113,7 @@ The figure below illustrates the consortium components:
 
 ![](doc/img/arch.png)
 
-### Deploying the chaincode
+## Deploying the chaincode
 
 A [chaincode](https://hyperledger-fabric.readthedocs.io/en/latest/developapps/contractname.html#chaincode) is a generic container for deploying code to a Hyperledger Fabric blockchain network. One or more related smart contracts are defined within a chaincode. Every smart contract has a name that uniquely identifies it within a chaincode. Applications access a particular smart contract within a chaincode using its contract name.
 
@@ -56,17 +135,6 @@ In a typical business blockchain application, network participants invoke smart 
 This example has a client that exposes a RESTful API to interact with a blockchain network. This approach is useful if you have a variety of clients like web applications, mobile applications, and IoT devices, for example. 
 
 Now we are examining how to interact with the network.
-
-### Getting acquainted with the client source-code
-
-Using your editor, take a look at files at the *client/backend* folder. Spend some minutes getting acquainted with the folder structure.
-
-* **src/app.js**: This source-code exposes the API. It uses the Express library to expose resources
-* **src/fabric/network.js**: This source-code uses the Fabric API to connect to the network
-* **config.json**: This file contains relevant information for the connection
-* **package.json**: This file contains the required library to run the app.
-
-A client needs some basic information to connect to the network. You will see that the file config.json is pointing to a [connection profile](https://hyperledger-fabric.readthedocs.io/en/latest/developapps/connectionprofile.html). Take some minutes to analyse this file.
 
 ### Installing client dependencies 
 
@@ -114,15 +182,20 @@ npm start
 
 This command will start an HTTP server running on port 8080.
 
-## Transaction Endorsement
+### Starting the frontend server
 
-The consensus in Hyperledger Fabric is reached through endorsement. Every chaincode has an endorsement policy which specifies the set of peers on a channel that must execute chaincode and endorse the execution results for the transaction to be considered valid. These endorsement policies define the organizations (through their peers) who must “endorse” (i.e., approve of) the execution of a proposal [1].
+use the following command
 
-As part of the transaction validation step performed by the peers, each validating peer checks to make sure that the transaction contains the appropriate number of endorsements and that they are from the expected sources (both of these are specified in the endorsement policy). The endorsements are also checked to make sure they’re valid (i.e., that they are valid signatures from valid certificates) [1].
+```
+cd client/app
+```
 
-An endorsement policy is a condition on what endorses a transaction. Blockchain peers have a pre-specified set of endorsement policies, which are referenced by a deploy transaction that installs specific chaincode. Endorsement policies can be parametrized, and these parameters can be specified by a deploy transaction.
+to start up the frontend server type the following command:
+
+```
+npm run dev
+```
+
+This starts a local development server in which the application can be used.
 
 
-The figure below presents the standard workflow of chaincode transaction execution and endorsement.
-
-![](doc/img/transaction.png)
