@@ -206,13 +206,13 @@ app.post('/rest/start', async (req, res) => {
 /**
  * {"electionCreatorId": "C1", "electionId": "E1"}
  */
-app.get('/rest/getElection', async (req, res) => {
-    let networkObj = await network.connectToNetwork(req.body.electionCreatorId);
+app.get('/rest/getElection/:electionCreatorId/:electionId', async (req, res) => {
+    let networkObj = await network.connectToNetwork(req.params.electionCreatorId);
     if (networkObj.error) {
         res.status(400).json({ message: networkObj.error });
     }
 
-    let invokeResponse = await network.getElection(networkObj, req.body.electionId);
+    let invokeResponse = await network.getElection(networkObj, req.params.electionId);
     if (invokeResponse.error) {
         res.status(400).json({ message: invokeResponse.error });
     } else {
