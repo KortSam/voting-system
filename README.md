@@ -193,3 +193,18 @@ npm run dev
 This starts a local development server in which the application can be used.
 
 
+## Using the application
+
+Once the frontend and backend server are running. You are able to create a Voter in the register screen.
+
+Once you have registered an account it automatically creates a electionCreator and you are able to create an election.
+
+Since the frontend is just for show. The creating of an election is hardcoded.
+
+Once you have created an election it automatically starts to create 3 test participants.
+
+You can click on one of these participants and vote on one of them using the vote button.
+
+After that you are able to click on the finish election button simulating that you are an election creator and finishing the election and counting the votes. It should be noted that ONLY electioncreators can actually create, start and finish an election. But for simplicity it is all put into one single page.
+
+
