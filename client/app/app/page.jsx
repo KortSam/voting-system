@@ -27,15 +27,19 @@ export default function Home() {
     })
     Cookies.set('id', encryptedUserId)
 
-    console.log(res)
 
-      await fetch('http://localhost:8080/rest/createParticipant', {
-        method: "POST",
-        body: '{"id":"C1","name":"electionCreator 1","role":"ElectionCreator"}',
-        headers: {
-          "Content-Type": "application/json",
-        },
-      })
+    const res2 = await fetch('http://localhost:8080/rest/createParticipant', {
+      method: "POST",
+      body: '{"id":"C1","name":"electionCreator 1","role":"ElectionCreator"}',
+      headers: {
+        "Content-Type": "application/json",
+      },
+    })
+
+    if(!res2.ok) {
+      console.log('electionCreator C1 already exists')
+    }
+
     Cookies.set('mail', encryptedmail)
 
 
