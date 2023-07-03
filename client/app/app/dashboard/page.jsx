@@ -1,5 +1,5 @@
 "use client"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import Cookies from 'js-cookie'
 
 export default function Dashboard() {
@@ -7,55 +7,86 @@ export default function Dashboard() {
   const [participants, setParticipants] = useState([]);
   const [selectedParticipant, setSelectedParticipant] = useState(null);
 
+
+  useEffect(() => {
+    const fetchElection = async () => {
+      const res = await fetch('http://localhost:8080/rest/getElection/C1/E1')
+      const data = await res.json()
+      setElection(data)
+    }
+
+    fetchElection().catch(console.error)
+  }, [])
+
   async function createElection() {
-    await fetch('http://localhost:8080/rest/createParticipant', {
-      method: "POST",
-      body: '{"id":"P1","name":"Mark Rutte","role":"Participant"}',
-      headers: {
-        "Content-Type": "application/json",
-      },
-    })
 
-    await fetch('http://localhost:8080/rest/createParticipant', {
-      method: "POST",
-      body: '{"id":"P2","name":"Barack Obama","role":"Participant"}',
-      headers: {
-        "Content-Type": "application/json",
-      },
-    })
-    await fetch('http://localhost:8080/rest/createParticipant', {
-      method: "POST",
-      body: '{"id":"P3","name":"Donald Trump","role":"Participant"}',
-      headers: {
-        "Content-Type": "application/json",
-      },
-    })
+    const res4 = await fetch('http://localhost:8080/rest/getElection/C1/E1')
 
-    const res = await fetch('http://localhost:8080/rest/createElection', {
-      method: "POST",
-      body: '{"electionCreatorId": "C1", "electionId": "E1", "electionName": "Election-1", "electionParticipants": "[Mark Rutte, Barack Obama, Donald Trump]"}',
-      headers: {
-        "Content-Type": "application/json",
-      },
-    })
+    if(!res4.ok) {
+      await fetch('http://localhost:8080/rest/createParticipant', {
+        method: "POST",
+        body: '{"id":"Mark Rutte","name":"Mark Rutte","role":"Participant"}',
+        headers: {
+          "Content-Type": "application/json",
+        },
+      })
+  
+      await fetch('http://localhost:8080/rest/createParticipant', {
+        method: "POST",
+        body: '{"id":"Barack Obama","name":"Barack Obama","role":"Participant"}',
+        headers: {
+          "Content-Type": "application/json",
+        },
+      })
+      await fetch('http://localhost:8080/rest/createParticipant', {
+        method: "POST",
+        body: '{"id":"Donald Trump","name":"Donald Trump","role":"Participant"}',
+        headers: {
+          "Content-Type": "application/json",
+        },
+      })
+  
+      const res = await fetch('http://localhost:8080/rest/createElection', {
+        method: "POST",
+        body: '{"electionCreatorId": "C1", "electionId": "E1", "electionName": "Election-1", "electionParticipants": "[Mark Rutte, Barack Obama, Donald Trump]"}',
+        headers: {
+          "Content-Type": "application/json",
+        },
+      })
+      const data = await res.json()
+      setElection(data)
 
-    const data = await res.json()
-    setElection(data)
+    } else {
+      const res = await fetch('http://localhost:8080/rest/createElection', {
+        method: "POST",
+        body: '{"electionCreatorId": "C1", "electionId": "E2", "electionName": "Election-2", "electionParticipants": "[Mark Rutte, Barack Obama, Donald Trump]"}',
+        headers: {
+          "Content-Type": "application/json",
+        },
+      })
+      alert("Election E1 already exists. creating new election with ID E2 (because it is hardcoded you can only create 2 elections otherwise restart the server to clear the elections)")
+      const data = await res.json()
+      setElection(data)
+    }
+    
+
+
   }
 
   async function startElection() {
     const res = await fetch('http://localhost:8080/rest/start', {
       method: "POST",
-      body: '{"electionCreatorId": "C1", "electionId": "E1"}',
+      body: `{"electionCreatorId": "C1", "electionId": "${election.electionId}"}`,
       headers: {
         "Content-Type": "application/json",
       },
     })
+    console.log(election)
 
     const data = await res.json()
 
     const electionCreatorId = "C1"
-    const electionId = "E1"
+    const electionId = election.electionId
     const resParticipants = await fetch(`http://localhost:8080/rest/getParticipants/${electionCreatorId}/${electionId}`)
     const array = await resParticipants.text()
     const str = array.replace("[", "").replace("]", "");
@@ -97,7 +128,7 @@ export default function Dashboard() {
   async function finishElection() {
     const res = await fetch('http://localhost:8080/rest/finish', {
       method: "POST",
-      body: '{"electionCreatorId": "C1", "electionId": "E1"}',
+      body: `{"electionCreatorId": "C1", "electionId": "${election.electionId}"}`,
       headers: {
         "Content-Type": "application/json",
       },
