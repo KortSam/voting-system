@@ -29,13 +29,13 @@ export default function Home() {
 
     console.log(res)
 
-    //  await fetch('http://localhost:8080/rest/createParticipant', {
-    //    method: "POST",
-    //    body: '{"id":"C1","name":"electionCreator 1","role":"ElectionCreator"}',
-    //    headers: {
-    //      "Content-Type": "application/json",
-    //    },
-    //  })
+      await fetch('http://localhost:8080/rest/createParticipant', {
+        method: "POST",
+        body: '{"id":"C1","name":"electionCreator 1","role":"ElectionCreator"}',
+        headers: {
+          "Content-Type": "application/json",
+        },
+      })
     Cookies.set('mail', encryptedmail)
 
 
